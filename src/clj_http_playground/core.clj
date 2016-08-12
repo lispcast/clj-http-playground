@@ -1,34 +1,20 @@
 (ns clj-http-playground.core
-  (:require [clj-http.client :as http]
-            [clj-http.conn-mgr :as conn]))
+  (:require [clj-http.client :as http]))
 
-;; timeout
-(http/get "http://lispcast.com/"
-  {:conn-timeout 1000
-   :socket-timeout 1000})
+;; get request and parse response body as json:
+(http/get "https://api.forecast.io/forecast/f974f5244163e99cb38e48cc19627a55/37.8267,-122.423"
+  {:as :json})
 
-;; exceptions
-(http/get "http://lispcast.com/fdslkfjsdlkfj"
-  {:conn-timeout 1000
-   :socket-timeout 1000
-   :throw-exceptions false})
+;; get request and parse response body as json but leave keys as strings:
+(http/get "https://api.forecast.io/forecast/f974f5244163e99cb38e48cc19627a55/37.8267,-122.423"
+  {:as :json-string-keys})
 
-;; Basic Auth
-(http/get "http://lispcast.com/"
-  {:basic-auth ["username" "password"]})
+;; get the body as a stream
+(http/get "https://api.forecast.io/forecast/f974f5244163e99cb38e48cc19627a55/37.8267,-122.423"
+  {:as :stream})
 
-;; redirects
-(http/get "http://lispcast.com/"
-  {:max-redirects 0})
-
-;; ssl insecurity
-(http/get "https://lispcast.com/"
-  {:insecure? true})
-
-;; connection pool
-(def connection-pool (conn/make-reusable-conn-manager {:threads 1 :timeout 4}))
-
-(dotimes [x 1000]
-  (http/get "http://lispcast.com/" {:connection-manager connection-pool}))
-
-(conn/shutdown-manager connection-pool)
+;; post and set the content type of the body
+(http/post "https://api.forecast.io/forecast/f974f5244163e99cb38e48cc19627a55/37.8267,-122.423"
+  {:content-type :json
+   :form-params {:name "Eric"}
+   :as :json})
