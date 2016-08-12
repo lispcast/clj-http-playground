@@ -8,7 +8,10 @@ Code to accompany the [clj-http course][course], part of
 
 Please check out the tags on this repo for the different lessons:
 
-
+* requests: basics about how to send requests
+* data-types: how to parse request and response bodies as json and other types
+* scripting: use cookie stores to script up a web interaction
+* options: various common options explained
 
 ## License
 
