@@ -1,10 +1,64 @@
 (ns clj-http-playground.core
-  (:require [clj-http.client :as http]))
+  (:require [clj-http.client :as http]
+            [clj-http.cookies :as cookies])
+  (:import [org.jsoup Jsoup]))
 
-(def response (http/get "http://lispcast.com"
-                {:debug? true}))
+(defn fetch-api-key [email password]
+  (let [cookie-store (cookies/cookie-store)
+        login-page (http/get "https://developer.forecast.io/log_in"
+                     {:cookie-store cookie-store})
+        login-doc (-> login-page
+                    :body
+                    Jsoup/parse)
+        login-form (-> login-doc
+                     (.select "#login-form")
+                     first)
+        token (-> login-form
+                (.select "[name=\"authenticity_token\"]")
+                first
+                (.attr "value"))
+        page (http/post "https://developer.forecast.io/sessions"
+               {:force-redirects true
+                :cookie-store cookie-store
+                :form-params {:utf8 "✓"
+                              :authenticity_token token
+                              :email email
+                              :password password
+                              }})
+        page-doc (-> page
+                   :body
+                   Jsoup/parse)
+        api-key (-> page-doc
+                  (.select "#api_key")
+                  first
+                  (.attr "value"))]
+    api-key))
 
-(:status response)
-(:server (:headers response))
-(type (:body response))
+;;https://developer.forecast.io/users/reset_api_key
 
+(defn reset-api-key [email password]
+  (let [cookie-store (cookies/cookie-store)
+        login-page (http/get "https://developer.forecast.io/log_in"
+                     {:cookie-store cookie-store})
+        login-doc (-> login-page
+                    :body
+                    Jsoup/parse)
+        login-form (-> login-doc
+                     (.select "#login-form")
+                     first)
+        token (-> login-form
+                (.select "[name=\"authenticity_token\"]")
+                first
+                (.attr "value"))
+        page (http/post "https://developer.forecast.io/sessions"
+               {:force-redirects true
+                :cookie-store cookie-store
+                :form-params {:utf8 "✓"
+                              :authenticity_token token
+                              :email email
+                              :password password
+                              }})
+        response (http/get "https://developer.forecast.io/users/reset_api_key"
+                   {:cookie-store cookie-store
+                    :as :json})]
+    (:body response)))
