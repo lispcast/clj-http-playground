@@ -6,6 +6,10 @@ Code to accompany the [clj-http course][course], part of
 [course]: https://purelyfunctional.tv/courses/http-client-clj-http/
 [mentoring]: https://purelyfunctional.tv/
 
+Please check out the tags on this repo for the different lessons:
+
+
+
 ## License
 
 [![CC0](http://i.creativecommons.org/p/zero/1.0/88x31.png)](http://creativecommons.org/publicdomain/zero/1.0/)
