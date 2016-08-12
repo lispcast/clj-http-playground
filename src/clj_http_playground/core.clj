@@ -1,64 +1,34 @@
 (ns clj-http-playground.core
   (:require [clj-http.client :as http]
-            [clj-http.cookies :as cookies])
-  (:import [org.jsoup Jsoup]))
+            [clj-http.conn-mgr :as conn]))
 
-(defn fetch-api-key [email password]
-  (let [cookie-store (cookies/cookie-store)
-        login-page (http/get "https://developer.forecast.io/log_in"
-                     {:cookie-store cookie-store})
-        login-doc (-> login-page
-                    :body
-                    Jsoup/parse)
-        login-form (-> login-doc
-                     (.select "#login-form")
-                     first)
-        token (-> login-form
-                (.select "[name=\"authenticity_token\"]")
-                first
-                (.attr "value"))
-        page (http/post "https://developer.forecast.io/sessions"
-               {:force-redirects true
-                :cookie-store cookie-store
-                :form-params {:utf8 "✓"
-                              :authenticity_token token
-                              :email email
-                              :password password
-                              }})
-        page-doc (-> page
-                   :body
-                   Jsoup/parse)
-        api-key (-> page-doc
-                  (.select "#api_key")
-                  first
-                  (.attr "value"))]
-    api-key))
+;; timeout
+(http/get "http://lispcast.com/"
+  {:conn-timeout 1000
+   :socket-timeout 1000})
 
-;;https://developer.forecast.io/users/reset_api_key
+;; exceptions
+(http/get "http://lispcast.com/fdslkfjsdlkfj"
+  {:conn-timeout 1000
+   :socket-timeout 1000
+   :throw-exceptions false})
 
-(defn reset-api-key [email password]
-  (let [cookie-store (cookies/cookie-store)
-        login-page (http/get "https://developer.forecast.io/log_in"
-                     {:cookie-store cookie-store})
-        login-doc (-> login-page
-                    :body
-                    Jsoup/parse)
-        login-form (-> login-doc
-                     (.select "#login-form")
-                     first)
-        token (-> login-form
-                (.select "[name=\"authenticity_token\"]")
-                first
-                (.attr "value"))
-        page (http/post "https://developer.forecast.io/sessions"
-               {:force-redirects true
-                :cookie-store cookie-store
-                :form-params {:utf8 "✓"
-                              :authenticity_token token
-                              :email email
-                              :password password
-                              }})
-        response (http/get "https://developer.forecast.io/users/reset_api_key"
-                   {:cookie-store cookie-store
-                    :as :json})]
-    (:body response)))
+;; Basic Auth
+(http/get "http://lispcast.com/"
+  {:basic-auth ["username" "password"]})
+
+;; redirects
+(http/get "http://lispcast.com/"
+  {:max-redirects 0})
+
+;; ssl insecurity
+(http/get "https://lispcast.com/"
+  {:insecure? true})
+
+;; connection pool
+(def connection-pool (conn/make-reusable-conn-manager {:threads 1 :timeout 4}))
+
+(dotimes [x 1000]
+  (http/get "http://lispcast.com/" {:connection-manager connection-pool}))
+
+(conn/shutdown-manager connection-pool)
