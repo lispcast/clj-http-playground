@@ -1,10 +1,18 @@
 # clj-http-playground
 
 Code to accompany the [clj-http course][course], part of
-[PurelyFunctional.tv Online Mentoring][mentoring].
+[PurelyFunctional.tv][mentoring].
 
 [course]: https://purelyfunctional.tv/courses/http-client-clj-http/
 [mentoring]: https://purelyfunctional.tv/
+
+Please check out the branches on this repo for the different
+lessons:
+
+* requests: basics about how to send requests
+* data-types: how to parse request and response bodies as json and other types
+* scripting: use cookie stores to script up a web interaction
+* options: various common options explained
 
 ## License
 
